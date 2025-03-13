@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TradingPro - Live Chart</title>
+  <style>
+    /* ----------------------------------
+       GLOBAL RESET & TRANSITIONS
+    ---------------------------------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode {
+      background: #1e1e1e;
+      color: #ccc;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    button {
+      cursor: pointer;
+    }
+
+    /* ----------------------------------
+       PAGE SECTIONS (LOGIN, DASHBOARD, LOGOUT)
+    ---------------------------------- */
+    /* Hide pages by default; shown via JS */
+    #login-page,
+    #dashboard-page,
+    #logout-page {
+      display: none;
+      min-height: 100vh;
+    }
+
+    /* ----------------------------------
+       SPOTIFY-STYLE LOGIN PAGE
+    ---------------------------------- */
+    #login-page {
+      display: flex; /* Show login page first */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #000;  /* Spotify-like black */
+      color: #fff;
+    }
+    .login-container {
+      width: 350px;
+      text-align: center;
+    }
+    .login-container h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .login-socials {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .social-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .social-btn.google {
+      background: #fff;
+      color: #000;
+    }
+    .social-btn.facebook {
+      background: #1877f2;
+      color: #fff;
+    }
+    .social-btn.apple {
+      background: #333;
+      color: #fff;
+    }
+    .social-btn.phone {
+      background: #444;
+      color: #fff;
+    }
+    .social-btn:hover {
+      filter: brightness(90%);
+    }
+    .login-or {
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+    .login-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .login-fields input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      background: #121212; 
+      color: #fff;
+    }
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+    .remember-me input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 25px;
+      background: #1db954; 
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .login-btn:hover {
+      background: #179443;
+    }
+    .forgot-password {
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .signup {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .signup a {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    /* ----------------------------------
+       LOGOUT PAGE (SIMILAR STYLE)
+    ---------------------------------- */
+    #logout-page {
+      background: #000;
+      color: #fff;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+    }
+    .logout-container {
+      text-align: center;
+      padding: 40px;
+      border-radius: 10px;
+      max-width: 350px;
+    }
+    .logout-container h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    .logout-container p {
+      margin-bottom: 1.5rem;
+    }
+    .logout-container button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      background: #1db954;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .logout-container button:hover {
+      background: #179443;
+    }
+
+    /* ----------------------------------
+       DASHBOARD PAGE
+    ---------------------------------- */
+    #dashboard-page {
+      background: #f4f7f9;
+      color: #333;
+    }
+    body.dark-mode #dashboard-page {
+      background: #1e1e1e;
+      color: #ccc;
+    }
+
+    /* Top Header */
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 1100;
+      transition: background 0.3s;
+    }
+    body.dark-mode .top-header {
+      background: #2b2b2b;
+    }
+    .top-header .title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .top-header .actions {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Dark/Light Mode Toggle Switch (in the header) */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+      margin-left: 10px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #fff;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #2f80ed;
+    }
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Profile Icon & Dropdown */
+    .profile-container {
+      position: relative;
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #2f80ed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+    }
+    .profile-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      z-index: 1200;
+      width: 150px;
+    }
+    .profile-dropdown a {
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      color: #333;
+      transition: background 0.3s;
+    }
+    .profile-dropdown a:hover {
+      background: #f4f4f4;
+    }
+    body.dark-mode .profile-dropdown {
+      background: #2b2b2b;
+      border: 1px solid #444;
+    }
+    body.dark-mode .profile-dropdown a {
+      color: #ccc;
+    }
+    body.dark-mode .profile-dropdown a:hover {
+      background: #3a3a3a;
+    }
+
+    /* Floating Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 90px; /* below header */
+      left: 20px;
+      width: 250px;
+      background: rgba(47, 62, 78, 0.95);
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background 0.3s;
+    }
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .sidebar nav ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar nav ul li {
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .sidebar nav ul li:hover, .sidebar nav ul li.active {
+      background: #43566b;
+      transform: translateX(5px);
+    }
+    .sidebar-footer {
+      text-align: center;
+    }
+    .sidebar-footer button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: #43566b;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .sidebar-footer button:hover {
+      background: #56789a;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 300px; /* space for sidebar */
+      padding: 20px;
+      padding-top: 90px; /* account for header */
+      min-height: calc(100vh - 120px); /* header + footer */
+    }
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .content-header h1 {
+      font-size: 2rem;
+    }
+    .header-buttons button {
+      margin-left: 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background: #2f80ed;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .header-buttons button:hover {
+      background: #1b60c3;
+    }
+
+    /* Cards Section */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode .card {
+      background: #2b2b2b;
+      color: #ccc;
+    }
+    .card h3 {
+      margin-bottom: 10px;
+    }
+
+    /* Chart, Holdings & News Sections */
+    .chart-section, 
+    .holdings-section, 
+    .news-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode .chart-section,
+    body.dark-mode .holdings-section,
+    body.dark-mode .news-section {
+      background: #2b2b2b;
+      color: #ccc;
+    }
+
+    /* Holdings Table */
+    .holdings-section table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .holdings-section th, .holdings-section td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .holdings-section th {
+      background: #f4f4f4;
+    }
+    body.dark-mode .holdings-section th {
+      background: #3a3a3a;
+    }
+    .action-btn {
+      padding: 5px 10px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .action-btn.buy-btn {
+      background: #28a745;
+      color: #fff;
+    }
+    .action-btn.sell-btn {
+      background: #dc3545;
+      color: #fff;
+    }
+    .action-btn.buy-btn:hover {
+      background: #218838;
+    }
+    .action-btn.sell-btn:hover {
+      background: #c82333;
+    }
+
+    /* News Section */
+    .news-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .news-section li {
+      margin-bottom: 10px;
+    }
+    .news-section li a {
+      text-decoration: none;
+      color: #2f80ed;
+      transition: color 0.3s;
+    }
+    .news-section li a:hover {
+      color: #1b60c3;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 15px 20px;
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1100;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode .footer {
+      background: #2b2b2b;
+      color: #ccc;
+      border-top: 1px solid #444;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 20px;
+      }
+      .sidebar {
+        position: relative;
+        top: 0;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN PAGE -->
+  <div id="login-page">
+    <div class="login-container">
+      <h1>Log in to TradingPro</h1>
+      <!-- Social login buttons (like Spotify) -->
+      <div class="login-socials">
+        <button class="social-btn google">Continue with Google</button>
+        <button class="social-btn facebook">Continue with Facebook</button>
+        <button class="social-btn apple">Continue with Apple</button>
+        <button class="social-btn phone">Continue with phone number</button>
+      </div>
+      <div class="login-or">or</div>
+      <!-- Email/Password fields -->
+      <div class="login-fields">
+        <input type="text" id="username" placeholder="Email or username" />
+        <input type="password" id="password" placeholder="Password" />
+      </div>
+      <!-- Remember me + Log in -->
+      <div class="remember-me">
+        <input type="checkbox" id="rememberMe" />
+        <label for="rememberMe">Remember me</label>
+      </div>
+      <button class="login-btn" id="login-btn">Log In</button>
+      <div class="forgot-password">
+        <a href="#">Forgot your password?</a>
+      </div>
+      <div class="signup">
+        Don't have an account? <a href="#">Sign up for TradingPro</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div id="dashboard-page">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="title">Trading Dashboard</div>
+      <div class="actions">
+        <!-- Dark/Light Mode Toggle Switch -->
+        <label class="switch">
+          <input type="checkbox" id="darkModeToggle"/>
+          <span class="slider"></span>
+        </label>
+        <!-- Profile Icon -->
+        <div class="profile-container" id="profile-container">
+          <div class="profile-icon">👤</div>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <a href="#">Profile</a>
+            <a href="#">Settings</a>
+            <a href="#" id="logout-btn">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Floating Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="logo">
+          <h2>TradingPro</h2>
+        </div>
+        <nav>
+          <ul>
+            <li class="active">Overview</li>
+            <li>Holdings</li>
+            <li>Transactions</li>
+            <li>Market</li>
+            <li>News</li>
+            <li>Settings</li>
+          </ul>
+        </nav>
+      </div>
+      <div class="sidebar-footer">
+        <button id="sidebar-logout-btn">Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Dashboard</h1>
+        <div class="header-buttons">
+          <button id="refresh-btn">Refresh Data</button>
+          <button id="buy-btn">Buy</button>
+          <button id="sell-btn">Sell</button>
+        </div>
+      </div>
+      <!-- Cards Section -->
+      <section class="cards">
+        <div class="card">
+          <h3>Total Portfolio Value</h3>
+          <p id="total-value">$120,000</p>
+        </div>
+        <div class="card">
+          <h3>Today's Change</h3>
+          <p id="todays-change">+2.5%</p>
+        </div>
+        <div class="card">
+          <h3>Total Gain/Loss</h3>
+          <p id="total-gain">+15%</p>
+        </div>
+        <div class="card">
+          <h3>Cash Balance</h3>
+          <p id="cash-balance">$10,000</p>
+        </div>
+      </section>
+      <!-- Chart Section (Live Price Action) -->
+      <section class="chart-section">
+        <h2>Live Price Chart</h2>
+        <canvas id="stockChart" width="600" height="300"></canvas>
+      </section>
+      <!-- Holdings Section -->
+      <section class="holdings-section">
+        <h2>Holdings</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Shares</th>
+              <th>Avg Price</th>
+              <th>Current Price</th>
+              <th>P/L</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-table-body">
+            <tr>
+              <td>AAPL</td>
+              <td>50</td>
+              <td>$120.00</td>
+              <td>$130.00</td>
+              <td>+8.33%</td>
+              <td>
+                <button class="action-btn buy-btn">Buy</button>
+                <button class="action-btn sell-btn">Sell</button>
+              </td>
+            </tr>
+            <tr>
+              <td>GOOGL</td>
+              <td>10</td>
+              <td>$1500.00</td>
+              <td>$1520.00</td>
+              <td>+1.33%</td>
+              <td>
+                <button class="action-btn buy-btn">Buy</button>
+                <button class="action-btn sell-btn">Sell</button>
+              </td>
+            </tr>
+            <tr>
+              <td>TSLA</td>
+              <td>5</td>
+              <td>$600.00</td>
+              <td>$580.00</td>
+              <td>-3.33%</td>
+              <td>
+                <button class="action-btn buy-btn">Buy</button>
+                <button class="action-btn sell-btn">Sell</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <!-- News Section -->
+      <section class="news-section">
+        <h2>Latest Market News</h2>
+        <ul id="news-list">
+          <li><a href="#" target="_blank">Market opens higher on strong earnings</a></li>
+          <li><a href="#" target="_blank">Tech stocks rally amid economic optimism</a></li>
+          <li><a href="#" target="_blank">Global markets mixed ahead of Fed meeting</a></li>
+          <li><a href="#" target="_blank">Cryptocurrency trends: What to expect?</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2025 TradingPro. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- LOGOUT PAGE -->
+  <div id="logout-page">
+    <div class="logout-container">
+      <h2>You have been logged out.</h2>
+      <p>Thank you for using TradingPro.</p>
+      <button id="login-again-btn">Login Again</button>
+    </div>
+  </div>
+
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    /*********************************************
+     * PAGE NAVIGATION: LOGIN, DASHBOARD, LOGOUT *
+     *********************************************/
+    function showPage(pageId) {
+      // Hide all pages
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('dashboard-page').style.display = 'none';
+      document.getElementById('logout-page').style.display = 'none';
+
+      // Show the chosen page
+      if (pageId === 'dashboard-page') {
+        document.getElementById(pageId).style.display = 'block';
+      } else {
+        document.getElementById(pageId).style.display = 'flex';
+      }
+    }
+
+    // On first load, show login page
+    showPage('login-page');
+
+    // Simulated login
+    function login() {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      if (!user || !pass) {
+        alert('Please enter username and password.');
+        return;
+      }
+      // Show the dashboard and initialize chart
+      showPage('dashboard-page');
+      initLiveChart();
+    }
+
+    // Logout
+    function logout() {
+      showPage('logout-page');
+    }
+
+    // Login again
+    function loginAgain() {
+      showPage('login-page');
+    }
+
+    /*********************************************
+     * LIVE CHART INITIALIZATION (Chart.js)
+     *********************************************/
+    let priceChart = null;
+    let chartInitialized = false;
+    let price = 100;  // Starting price
+    const timeStamps = [];
+    const prices = [];
+
+    function initLiveChart() {
+      if (chartInitialized) return; // Avoid re-initializing
+      chartInitialized = true;
+
+      const ctx = document.getElementById('stockChart').getContext('2d');
+
+      // Initialize with 20 data points
+      for (let i = 0; i < 20; i++) {
+        timeStamps.push(getTimeString());
+        prices.push(price.toFixed(2));
+        randomWalk(); // shift price a bit
+      }
+
+      priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: timeStamps,
+          datasets: [{
+            label: 'Live Price',
+            data: prices,
+            fill: false,
+            borderColor: '#2f80ed',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              display: true,
+              title: { display: true, text: 'Time' }
+            },
+            y: {
+              display: true,
+              title: { display: true, text: 'Price ($)' }
+            }
+          }
+        }
+      });
+
+      // Update chart every 2 seconds
+      setInterval(updateLiveChart, 2000);
+    }
+
+    function updateLiveChart() {
+      // Shift out the oldest data point
+      timeStamps.shift();
+      prices.shift();
+
+      // Add a new data point
+      timeStamps.push(getTimeString());
+      randomWalk(); // shift price a bit
+      prices.push(price.toFixed(2));
+
+      // Update the chart
+      priceChart.update();
+    }
+
+    function randomWalk() {
+      // Simulate a random price movement
+      const change = (Math.random() - 0.5) * 2; 
+      price = Math.max(10, price + change); // floor at 10
+    }
+
+    function getTimeString() {
+      // Return HH:MM:SS format
+      const now = new Date();
+      return now.toTimeString().split(' ')[0];
+    }
+
+    /*********************************************
+     * EVENT LISTENERS
+     *********************************************/
+    // Login page
+    document.getElementById('login-btn').addEventListener('click', login);
+
+    // Dark/Light mode toggle
+    document.getElementById('darkModeToggle').addEventListener('change', function() {
+      document.body.classList.toggle('dark-mode', this.checked);
+    });
+
+    // Profile dropdown
+    const profileContainer = document.getElementById('profile-container');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    profileContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileDropdown.style.display = (profileDropdown.style.display === 'block') ? 'none' : 'block';
+    });
+    document.addEventListener('click', (e) => {
+      if (!profileContainer.contains(e.target)) {
+        profileDropdown.style.display = 'none';
+      }
+    });
+
+    // Logout from dropdown or sidebar
+    document.getElementById('logout-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      logout();
+    });
+    document.getElementById('sidebar-logout-btn').addEventListener('click', logout);
+
+    // Dashboard actions
+    document.getElementById('refresh-btn').addEventListener('click', () => alert('Data refreshed!'));
+    document.getElementById('buy-btn').addEventListener('click', () => alert('Buy action triggered!'));
+    document.getElementById('sell-btn').addEventListener('click', () => alert('Sell action triggered!'));
+
+    // Sidebar nav items
+    document.querySelectorAll('.sidebar nav ul li').forEach((item) => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.sidebar nav ul li').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+        alert('Navigated to ' + this.textContent);
+      });
+    });
+
+    // Logout page
+    document.getElementById('login-again-btn').addEventListener('click', loginAgain);
+  </script>
+</body>
+</html>
