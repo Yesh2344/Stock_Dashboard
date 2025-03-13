@@ -11,3 +11,8 @@
 
 ## ✨ Features
 
+### 🔐 Authentication
+* **Modern Login Experience** - Spotify-inspired design with multiple login options
+* **Social Integration** - Quick access via Google, Facebook, and Apple
+* **Security Options** - Password recovery and "Remember me" functionality
+
