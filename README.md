@@ -16,3 +16,9 @@
 * **Social Integration** - Quick access via Google, Facebook, and Apple
 * **Security Options** - Password recovery and "Remember me" functionality
 
+### 📊 Dashboard
+* **Live Trading Data** - Real-time stock price charts with automatic updates
+* **Portfolio Insights** - At-a-glance summary cards for key metrics
+* **Holdings Management** - Interactive table with current positions and performance
+* **Market Intelligence** - Latest news feed to inform trading decisions
+
