@@ -99,3 +99,5 @@ Copyright © 2025 TradingPro. All rights reserved.
 </p>
 
 ## Contact
+
+Email:yeswanthsoma83@gmail.com
