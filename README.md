@@ -91,7 +91,7 @@ Simply enter any username/password combination for demo purposes and click "Log 
 ## 📜 License
 
 Copyright © 2025 TradingPro. All rights reserved.
-
+@Yeswanth Soma
 ---
 
 <p align="center">
