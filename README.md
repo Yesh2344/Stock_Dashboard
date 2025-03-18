@@ -1,6 +1,5 @@
 # 📈 TradingPro - Modern Trading Dashboard
 
-![TradingPro Banner](https://via.placeholder.com/1200x300)
 
 > A sleek, responsive web application for stock trading and portfolio management with real-time data visualization.
 
