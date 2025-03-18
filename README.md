@@ -97,3 +97,5 @@ Copyright © 2025 TradingPro. All rights reserved.
 <p align="center">
   <b>Built with ❤️ for modern traders</b>
 </p>
+
+## Contact
